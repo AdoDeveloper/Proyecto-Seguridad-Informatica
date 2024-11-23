@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <title>Crear Transacción</title>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto py-10">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">Nueva Transacción</h1>
+        <p class="text-lg text-gray-600 mb-8">Rellena el formulario para registrar una nueva transacción.</p>
+
+        <form action="/transactions/create" method="POST" class="bg-white shadow-md rounded-lg p-6">
+            <div class="mb-4">
+                <label for="amount" class="block text-gray-700 font-medium mb-2">Monto</label>
+                <input type="number" name="amount" id="amount" step="0.01" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ingresa el monto" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="type" class="block text-gray-700 font-medium mb-2">Tipo</label>
+                <select name="type" id="type" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                    <option value="income">Ingreso</option>
+                    <option value="expense">Gasto</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700 font-medium mb-2">Descripción</label>
+                <textarea name="description" id="description" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Describe la transacción"></textarea>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full bg-purple-800 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300">
+                    Registrar Transacción
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
