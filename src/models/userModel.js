@@ -17,22 +17,23 @@ exports.findUserByUsername = async (username) => {
 };
 
 /**
- * Buscar un usuario por su correo electrónico (insegura).
- * Esta función es vulnerable a SQL Injection.
+ * Buscar un usuario por su correo electrónico (seguro).
+ * Esta función ahora usa una consulta parametrizada para evitar SQL Injection.
  * @param {string} email - Correo electrónico del usuario.
  * @returns {Promise<Object|null>} Usuario encontrado o null si no existe.
  */
 exports.findUserByEmail = async (email) => {
     try {
-        // Consulta insegura que concatena el valor directamente
-        const query = `SELECT * FROM user WHERE email = '${email}'`;
-        const [rows] = await pool.query(query); // pool.query permite ejecutar una consulta sin parámetros.
+        // Usar una consulta parametrizada para evitar SQL Injection
+        const query = 'SELECT * FROM user WHERE email = ?';
+        const [rows] = await pool.execute(query, [email]); // Uso de execute con parámetros
         return rows.length > 0 ? rows[0] : null;
     } catch (error) {
-        console.error('Error al buscar usuario por correo electrónico (inseguro):', error);
+        console.error('Error al buscar usuario por correo electrónico:', error);
         throw error;
     }
 };
+
 /**
  * Crear un nuevo usuario.
  * @param {Object} user - Datos del usuario.

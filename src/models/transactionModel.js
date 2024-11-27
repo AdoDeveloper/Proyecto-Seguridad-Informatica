@@ -44,7 +44,7 @@ exports.getTransactionsByUserId = async (userId) => {
 exports.createTransaction = async (userId, amount, type, description = null) => {
     try {
         // Validación de tipo de transacción
-        if (!['income', 'expense'].includes(type)) {
+        if (!['Ingreso', 'Egreso'].includes(type)) {
             throw new Error('El tipo de transacción debe ser "income" o "expense"');
         }
 

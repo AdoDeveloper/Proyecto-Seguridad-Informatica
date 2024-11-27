@@ -1,0 +1,116 @@
+<div class="container py-5">
+    <h1 class="text-primary mb-4">Tus Transacciones</h1>
+    <p class="text-muted mb-4">Consulta tus transacciones y realiza nuevas.</p>
+    <div class="mb-4">
+        <a href="/transactions/create" class="btn btn-outline-primary">Crear transacción</a>
+    </div>
+
+    <!-- Tabla de Transacciones -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th class="py-3 px-6">Monto</th>
+                    <th class="py-3 px-6">Tipo</th>
+                    <th class="py-3 px-6">Descripción</th>
+                    <th class="py-3 px-6">Fecha</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-list" class="text-sm">
+                <!-- Aquí se mostrarán las transacciones -->
+            </tbody>
+        </table>
+
+        <!-- Mostrar total -->
+        <div class="mt-4 p-3 bg-light rounded">
+            <span class="fw-bold">Total Monto:</span>
+            <span id="total-monto" class="fw-bold">0.00</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Función para formatear la fecha en formato dd-mm-aaaa hh:mm:ss con zona horaria América Central (El Salvador)
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+
+        // Usamos Intl.DateTimeFormat para formatear la fecha a la zona horaria de El Salvador
+        const formatter = new Intl.DateTimeFormat('es-SV', {
+            timeZone: 'America/El_Salvador',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+
+        // Aplicamos el formateo
+        const formattedDate = formatter.format(date);
+        return formattedDate;
+    }
+
+    // Función para obtener las transacciones desde el servidor
+    async function obtenerTransacciones() {
+        try {
+            const response = await fetch('/transactions/api/transactions', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token') // token almacenado en localStorage
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al obtener las transacciones');
+            }
+
+            const transacciones = await response.json();
+            actualizarTabla(transacciones);
+        } catch (error) {
+            console.error('Error al obtener transacciones:', error);
+        }
+    }
+
+    // Función para actualizar la tabla con las transacciones
+    function actualizarTabla(transacciones) {
+        const lista = document.getElementById('transaction-list');
+        const totalElemento = document.getElementById('total-monto');
+        lista.innerHTML = '';  // Limpiar la tabla antes de actualizar
+
+        let totalMonto = 0;
+
+        transacciones.forEach(transaccion => {
+            const fila = document.createElement('tr');
+
+            // Convertimos el monto a número para poder sumarlo/restarlo
+            const monto = parseFloat(transaccion.amount) || 0;
+
+            // Si es Egreso, restamos, si es Ingreso, sumamos
+            if (transaccion.type === 'Egreso') {
+                totalMonto -= monto;
+            } else {
+                totalMonto += monto;
+            }
+
+            fila.innerHTML = `
+                <td class="py-3 px-6 text-gray-800">$ ${monto.toFixed(2)}</td>
+                <td class="py-3 px-6">${transaccion.type}</td>
+                <td class="py-3 px-6 text-muted">${transaccion.description || 'Sin descripción'}</td>
+                <td class="py-3 px-6">${formatDate(transaccion.created_at)}</td>
+            `;
+
+            lista.appendChild(fila);
+        });
+
+        // Mostrar el total del monto en el elemento correspondiente
+        totalElemento.textContent = totalMonto.toFixed(2);
+    }
+
+    // Hacer la petición cada 3 segundos (10000ms = 10 segundos)
+    setInterval(obtenerTransacciones, 10000);
+
+    // Cargar las transacciones al cargar la página
+    document.addEventListener('DOMContentLoaded', obtenerTransacciones);
+</script>

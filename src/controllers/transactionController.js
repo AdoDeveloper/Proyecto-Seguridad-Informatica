@@ -4,7 +4,19 @@ const transactionModel = require('../models/transactionModel');
 exports.getUserTransactions = async (req, res) => {
     try {
         const transactions = await transactionModel.getTransactionsByUserId(req.user.id);
-        res.render('dashboard', { transactions });
+        res.render('pages/dashboard', { transactions }); // Pasamos las transacciones a la vista EJS
+    } catch (error) {
+        console.error('Error al obtener transacciones del usuario:', error);
+        res.status(500).send('Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.');
+    }
+};
+
+
+// Obtener transacciones del usuario autenticado en formato JSON
+exports.getUserTransactionsJSON = async (req, res) => {
+    try {
+        const transactions = await transactionModel.getTransactionsByUserId(req.user.id);
+        res.json(transactions);  // Retorna las transacciones como JSON
     } catch (error) {
         console.error('Error al obtener transacciones del usuario:', error);
         res.status(500).send('Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.');
@@ -15,10 +27,20 @@ exports.getUserTransactions = async (req, res) => {
 exports.getAllTransactions = async (req, res) => {
     try {
         const transactions = await transactionModel.getAllTransactions();
-        res.render('admin_dashboard', { transactions });
+        res.render('pages/admin_dashboard', { transactions });
     } catch (error) {
         console.error('Error al obtener todas las transacciones:', error);
         res.status(500).send('Hubo un problema al cargar las transacciones. Por favor, intenta nuevamente.');
+    }
+};
+
+// Obtener transacciones del usuario autenticado
+exports.getFormCreateTransaction = async (req, res) => {
+    try {
+        res.render('pages/transaction_form');
+    } catch (error) {
+        console.error('Error al obtener el formulario');
+        res.status(500).send('Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.');
     }
 };
 
@@ -28,7 +50,7 @@ exports.createTransaction = async (req, res) => {
         const { amount, type, description } = req.body;
 
         // Validar inputs
-        if (!amount || isNaN(amount) || !['income', 'expense'].includes(type)) {
+        if (!amount || isNaN(amount) || !['Ingreso', 'Egreso'].includes(type)) {
             return res.status(400).send('Datos de transacción inválidos. Por favor verifica los campos.');
         }
 

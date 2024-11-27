@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 exports.verifyToken = (req, res, next) => {
     const token = req.cookies.authToken;
     if (!token) {
-        return res.redirect('/');
+        return res.redirect('/login');
     }
 
     try {
@@ -12,7 +12,7 @@ exports.verifyToken = (req, res, next) => {
         next();
     } catch (error) {
         res.clearCookie('authToken');
-        res.redirect('/');
+        res.redirect('/login');
     }
 };
 

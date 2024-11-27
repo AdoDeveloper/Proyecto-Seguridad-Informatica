@@ -1,0 +1,47 @@
+<!-- Main Navbar Section -->
+  <nav class="sticky-top bg-dark navbar navbar-expand-lg">
+    <div class="container">
+      <!-- Logo Section -->
+      <a class="navbar-brand" href="/" style="padding-bottom: 1rem;">
+        <h2><i class="fa fa-money"></i> FINANCE ALFA LOBO</h2>
+      </a>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <!-- Navbar Links -->
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/"><i class="fa fa-home"></i> Inicio</a>
+          </li>
+         {{#if user}}
+          <li class="nav-item">
+            <a class="nav-link" href="#features"><i class="fa fa-cogs"></i> Features</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#support"><i class="fa fa-life-ring"></i> Support</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/transactions/dashboard"><i class="fa fa-exchange"></i> Transacciones</a>
+          </li>
+          {{/if}}
+             <!-- Enlaces para iniciar o cerrar sesión (si no está autenticado) -->
+            {{#if user}}
+            <li class="nav-item">
+                <a class="nav-link" href="/login/logout"><i class="fa fa-sign-out"></i> Cerrar Sesión</a>
+            </li>
+            {{else}}
+            <li class="nav-item">
+                <a class="nav-link" href="/login"><i class="fa fa-sign-in"></i> Iniciar Sesión</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="/register"><i class="fa fa-user-plus"></i> Registrarse</a>
+            </li>
+            {{/if}}
+        </ul>
+      </div>
+    </div>
+</nav>

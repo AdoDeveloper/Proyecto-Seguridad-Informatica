@@ -1,0 +1,46 @@
+<main class="">
+  <!-- ===== Formulario de Inicio de Sesión Start ===== -->
+  <section class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <!-- Borde de fondo -->
+        <div class="card shadow-lg p-4">
+          <div class="card-body">
+            <h2 class="text-center mb-4">Inicia sesión en tu cuenta</h2>
+
+            <!-- Mostrar el error si existe -->
+            {{#if error}}
+            <div class="alert alert-danger">
+              <p>{{error}}</p>
+            </div>
+            {{/if}}
+
+            <form action="/login" method="POST">
+              <!-- Campo de correo -->
+              <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="example@gmail.com" required>
+              </div>
+
+              <!-- Campo de contraseña -->
+              <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="**************" required>
+              </div>
+
+              <!-- Botón de inicio de sesión -->
+              <button type="submit" class="btn btn-primary w-100 py-2">Iniciar Sesión</button>
+
+              <!-- Enlace de registro -->
+              <p class="text-center mt-3">
+                ¿Aún no tienes una cuenta?
+                <a href="/register" class="text-primary">Regístrate</a>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== Formulario de Inicio de Sesión End ===== -->
+</main>
