@@ -2,6 +2,9 @@ const express = require('express');
 const morgan = require('morgan'); // Importar Morgan
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const cron = require('node-cron');
+const axios = require('axios');
+const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 require('dotenv').config();
@@ -23,5 +26,14 @@ app.set('views', './src/views'); // Asegura la configuración correcta de la car
 // Rutas
 app.use('/', authRoutes);
 app.use('/transactions', transactionRoutes);
+
+cron.schedule('*/14 * * * *', async () => {
+    try {
+      await axios.get('https://alfalobo.onrender.com');
+      console.log('Ping exitoso.');
+    } catch (error) {
+      console.error('Error en el ping:', error.message);
+    }
+});
 
 module.exports = app;
