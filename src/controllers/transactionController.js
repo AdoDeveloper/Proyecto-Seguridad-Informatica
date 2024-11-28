@@ -34,25 +34,20 @@ exports.getUserTransactions = async (req, res) => {
     }
 };
 
-// Función para agregar timeout a las operaciones asíncronas
-const timeoutPromise = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera excedido')), ms));
-
+// Obtener transacciones del usuario autenticado en formato JSON, incluyendo el saldo y número de cuenta
 exports.getUserTransactionsJSON = async (req, res) => {
     try {
-        // Establecer el límite de tiempo en 4 segundos (4000 ms)
-        const timeout = 4000;
-
-        // Usar Promise.race para competir entre la consulta y el timeout
-        const userPromise = User.findByPk(req.user.id, {
+        // Obtener las transacciones y el saldo del usuario
+        const user = await User.findByPk(req.user.id, {
             attributes: ['id', 'username', 'role', 'balance', 'account_number'], // Incluir account_number
-        }).then(user => {
-            if (!user) {
-                throw new Error('Usuario no encontrado');
-            }
-            return user;
         });
 
-        const transactionsPromise = Transaction.findAll({
+        if (!user) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        // Obtener las transacciones del usuario donde el usuario sea emisor o receptor
+        const transactions = await Transaction.findAll({
             where: {
                 [Op.or]: [
                     { user_id: req.user.id },  // Si el usuario es el emisor
@@ -73,16 +68,11 @@ exports.getUserTransactionsJSON = async (req, res) => {
             ]
         });
 
-        // Usar Promise.race para garantizar que no pase el tiempo límite
-        const [user, transactions] = await Promise.race([
-            Promise.all([userPromise, transactionsPromise]),  // Ejecutar ambas promesas
-            timeoutPromise(timeout)  // Si algo toma más de 4 segundos, se rechaza con el error de timeout
-        ]);
-
-        // Retornar las transacciones, saldo y número de cuenta en formato JSON
+        // Retornar las transacciones, saldo y número de cuenta
         res.json({ transactions, balance: user.balance, account_number: user.account_number });
     } catch (error) {
         console.error('Error al obtener transacciones del usuario:', error);
+
         if (error.message === 'Tiempo de espera excedido') {
             return res.status(408).json({ error: 'La solicitud ha excedido el tiempo de espera. Intenta nuevamente.' });
         }
