@@ -1,25 +1,33 @@
+const { Op } = require('sequelize');
 const Transaction = require('../models/Transaction'); // Modelo Sequelize de transacciones
 const User = require('../models/User'); // Modelo Sequelize de usuario
 
 // Obtener transacciones del usuario autenticado
 exports.getUserTransactions = async (req, res) => {
     try {
+        // Obtener las transacciones donde el usuario sea el emisor o el receptor
         const transactions = await Transaction.findAll({
-            where: { user_id: req.user.id },
+            where: {
+                [Op.or]: [
+                    { user_id: req.user.id },  // Si el usuario es el emisor
+                    { destination_user_id: req.user.id }  // Si el usuario es el receptor
+                ]
+            },
             include: [
                 {
                     model: User,
                     as: 'user', // Emisor
-                    attributes: ['username', 'role', 'account_number'] // Incluimos datos del usuario que hizo la transacción
+                    attributes: ['username', 'role', 'account_number'] // Incluir datos del usuario que hizo la transacción
                 },
                 {
                     model: User,
                     as: 'destination', // Receptor
-                    attributes: ['username'] // Incluimos el username del receptor
+                    attributes: ['username'] // Incluir el username del receptor
                 }
             ]
         });
-        res.render('pages/dashboard', { transactions }); // Pasamos las transacciones a la vista EJS
+
+        res.render('pages/dashboard', { transactions }); // Pasamos las transacciones a la vista
     } catch (error) {
         console.error('Error al obtener transacciones del usuario:', error);
         return res.render('errors/500', { error: 'Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.' });
@@ -38,9 +46,14 @@ exports.getUserTransactionsJSON = async (req, res) => {
             return res.status(404).send('Usuario no encontrado');
         }
 
-        // Obtener las transacciones del usuario
+        // Obtener las transacciones del usuario donde el usuario sea emisor o receptor
         const transactions = await Transaction.findAll({
-            where: { user_id: req.user.id },
+            where: {
+                [Op.or]: [
+                    { user_id: req.user.id },  // Si el usuario es el emisor
+                    { destination_user_id: req.user.id }  // Si el usuario es el receptor
+                ]
+            },
             include: [
                 {
                     model: User,
@@ -59,7 +72,7 @@ exports.getUserTransactionsJSON = async (req, res) => {
         res.json({ transactions, balance: user.balance, account_number: user.account_number });
     } catch (error) {
         console.error('Error al obtener transacciones del usuario:', error);
-        return res.render('errors/500', { error: 'Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.' });
+        return res.status(500).json({ error: 'Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.' });
     }
 };
 
@@ -152,4 +165,3 @@ exports.createTransaction = async (req, res) => {
         return res.render('errors/500', { error: 'Hubo un problema al registrar la transacción. Por favor, intenta nuevamente.' });
     }
 };
-

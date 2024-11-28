@@ -25,7 +25,8 @@
                     <th class="py-3 px-6">Monto</th>
                     <th class="py-3 px-6">Tipo</th>
                     <th class="py-3 px-6">Descripción</th>
-                    <th class="py-3 px-6">Cuenta Destino</th>
+                    <th class="py-3 px-6">Emisor</th>
+                    <th class="py-3 px-6">Receptor</th>
                     <th class="py-3 px-6">Fecha</th>
                 </tr>
             </thead>
@@ -38,79 +39,69 @@
 
 <script>
     // Función para formatear la fecha en formato dd-mm-aaaa hh:mm:ss con zona horaria América Central (El Salvador)
-function formatDate(dateString) {
-    const date = new Date(dateString);
-
-    // Usamos Intl.DateTimeFormat para formatear la fecha a la zona horaria de El Salvador
-    const formatter = new Intl.DateTimeFormat('es-SV', {
-        timeZone: 'America/El_Salvador',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
-
-    // Aplicamos el formateo
-    const formattedDate = formatter.format(date);
-    return formattedDate;
-}
-
-// Función para obtener las transacciones, saldo y número de cuenta del usuario desde el servidor
-async function obtenerTransacciones() {
-    try {
-        const response = await fetch('/transactions/api/transactions', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token') // token almacenado en localStorage
-            }
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const formatter = new Intl.DateTimeFormat('es-SV', {
+            timeZone: 'America/El_Salvador',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
         });
-
-        if (!response.ok) {
-            throw new Error('Error al obtener las transacciones');
-        }
-
-        const data = await response.json();
-        actualizarTabla(data.transactions);
-        document.getElementById('user-balance').textContent = `$ ${data.balance.toFixed(2)}`;
-        document.getElementById('user-account-number').textContent = data.account_number; // Mostrar el número de cuenta
-    } catch (error) {
-        console.error('Error al obtener transacciones:', error);
+        return formatter.format(date);
     }
-}
 
-// Función para actualizar la tabla con las transacciones
-function actualizarTabla(transacciones) {
-    const lista = document.getElementById('transaction-list');
-    lista.innerHTML = '';  // Limpiar la tabla antes de actualizar
+    // Función para obtener las transacciones, saldo y número de cuenta del usuario desde el servidor
+    async function obtenerTransacciones() {
+        try {
+            const response = await fetch('/transactions/api/transactions', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token') // token almacenado en localStorage
+                }
+            });
 
-    let totalMonto = 0;
+            if (!response.ok) {
+                throw new Error('Error al obtener las transacciones');
+            }
 
-    transacciones.forEach(transaccion => {
-        const fila = document.createElement('tr');
+            const data = await response.json();
+            actualizarTabla(data.transactions);
+            document.getElementById('user-balance').textContent = `$ ${data.balance.toLocaleString('es-SV')}`;
+            document.getElementById('user-account-number').textContent = data.account_number; // Mostrar el número de cuenta
+        } catch (error) {
+            console.error('Error al obtener transacciones:', error);
+        }
+    }
 
-        // Convertimos el monto a número para poder sumarlo/restarlo
-        const monto = parseFloat(transaccion.amount) || 0;
+    // Función para actualizar la tabla con las transacciones
+    function actualizarTabla(transacciones) {
+        const lista = document.getElementById('transaction-list');
+        lista.innerHTML = '';  // Limpiar la tabla antes de actualizar
 
-        fila.innerHTML = `
-            <td class="py-3 px-6 text-gray-800">$ ${monto.toFixed(2)}</td>
-            <td class="py-3 px-6">${transaccion.type}</td>
-            <td class="py-3 px-6 text-muted">${transaccion.description || 'Sin descripción'}</td>
-            <td class="py-3 px-6 text-muted">${transaccion.destination ? transaccion.destination.username : 'N/A'}</td>
-            <td class="py-3 px-6">${formatDate(transaccion.createdAt)}</td>
-        `;
+        transacciones.forEach(transaccion => {
+            const fila = document.createElement('tr');
+            const monto = parseFloat(transaccion.amount) || 0;
 
-        lista.appendChild(fila);
-    });
-}
+            fila.innerHTML = `
+                <td class="py-3 px-6 text-gray-800">$ ${monto.toLocaleString('es-SV')}</td>
+                <td class="py-3 px-6">${transaccion.type}</td>
+                <td class="py-3 px-6 text-muted">${transaccion.description || 'Sin descripción'}</td>
+                <td class="py-3 px-6 text-muted">${transaccion.user.username}</td>
+                <td class="py-3 px-6 text-muted">${transaccion.destination ? transaccion.destination.username : 'N/A'}</td>
+                <td class="py-3 px-6">${formatDate(transaccion.createdAt)}</td>
+            `;
+            lista.appendChild(fila);
+        });
+    }
 
-// Hacer la petición cada 10 segundos (10000ms = 10 segundos)
-setInterval(obtenerTransacciones, 10000);
+    // Hacer la petición cada 10 segundos (10000ms = 10 segundos)
+    setInterval(obtenerTransacciones, 10000);
 
-// Cargar las transacciones al cargar la página
-document.addEventListener('DOMContentLoaded', obtenerTransacciones);
-
+    // Cargar las transacciones al cargar la página
+    document.addEventListener('DOMContentLoaded', obtenerTransacciones);
 </script>
