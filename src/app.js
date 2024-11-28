@@ -61,7 +61,7 @@ app.use('',homeRoutes);
 
 cron.schedule('*/14 * * * *', async () => {
     try {
-      await axios.get('https://proyecto-seguridad-informatica.onrender.com');
+      await axios.get('https://finance-alpha.onrender.com/');
       console.log('Ping exitoso.');
     } catch (error) {
       console.error('Error en el ping:', error.message);
