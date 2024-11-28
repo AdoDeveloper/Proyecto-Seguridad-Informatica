@@ -17,17 +17,27 @@ const ipTracker = new Map(); // Mitigacion
 require('dotenv').config();
 
 const app = express();
+// Configura express-session antes de las rutas
+app.use(session({
+  secret: process.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'strict',
+  },
+}));
+
+// Variables Globales para las Vistas
+// Middleware que pasa el usuario de la sesión a todas las vistas
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null; // Verifica si hay usuario en la sesión
+  next();
+});
 
 // Usar Morgan para registrar solicitudes HTTP
 app.use(morgan('dev'));  // Usa el formato 'dev' para un registro más legible en desarrollo
-
-// Configura express-session
-app.use(session({
-  secret: process.env.SECRET_KEY,  // Cambia por algo más seguro
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production' }  // Asegúrate de que el cookie es seguro en producción
-}));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -44,13 +54,6 @@ app.engine('.hbs', exphbs.engine({
   Handlebars: require('./lib/handlebars'),
 }));
 app.set('view engine', '.hbs');
-
-// Variables Globales para las Vistas
-// Middleware que pasa el usuario de la sesión a todas las vistas
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null; // Verifica si hay usuario en la sesión
-  next();
-});
 
 app.use((err, req, res, next) => {
   console.error(err.stack);  // Imprimir el error en consola
