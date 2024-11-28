@@ -84,8 +84,8 @@ cron.schedule('*/14 * * * *', async () => {
 
 // Middleware para limitar solicitudes (rate limiter) // Mitigacion
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minuto
-  max: 1000, // Limita a 1000 solicitudes por IP en 1 minuto
+  windowMs: 20 * 1000, // 20 segundos
+  max: 100, // Limita a 100 solicitudes por IP en 20 segundos
   message: 'Demasiadas solicitudes desde esta IP, por favor intente más tarde.',
   headers: true, // Añadir cabeceras en la respuesta con el límite
 });
@@ -126,8 +126,8 @@ app.use(trackRequests);
 
 // Middleware para la protección contra lentitud de solicitudes (slow down) // Mitigacion
 const speedLimiter = slowDown({
-  windowMs: 1 * 60 * 1000, // 1 minuto
-  delayAfter: 100, // Retrasa las solicitudes después de 100 peticiones
+  windowMs: 20 * 1000, // 20 segundos
+  delayAfter: 50, // Retrasa las solicitudes después de 50 peticiones
   delayMs: () => 500, // Retrasa 500ms por cada solicitud adicional
 });
 
