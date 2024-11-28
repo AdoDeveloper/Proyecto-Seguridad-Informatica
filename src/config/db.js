@@ -16,7 +16,7 @@ const sequelize = new Sequelize(
             acquire: 30000,     // Tiempo máximo para intentar conectar antes de un error
             idle: 10000         // Tiempo que una conexión puede estar inactiva antes de cerrarse
         },
-        logging: true          // Configura si deseas ver los logs de las consultas
+        logging: (msg) => console.log(msg),         // Configura si deseas ver los logs de las consultas
     }
 );
 
