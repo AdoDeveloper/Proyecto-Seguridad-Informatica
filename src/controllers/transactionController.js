@@ -86,7 +86,7 @@ exports.getUserTransactionsJSON = async (req, res) => {
         if (error.message === 'Tiempo de espera excedido') {
             return res.status(408).json({ error: 'La solicitud ha excedido el tiempo de espera. Intenta nuevamente.' });
         }
-        return res.status(500).res.render('errors/500').json({ error: 'Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.' });
+        return res.status(500).res.render('errors/500',{ error: 'Hubo un problema al cargar tus transacciones. Por favor, intenta nuevamente.' });
     }
 };
 
