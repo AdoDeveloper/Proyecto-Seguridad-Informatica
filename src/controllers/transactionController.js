@@ -100,6 +100,9 @@ exports.createTransaction = async (req, res) => {
             return res.status(400).render('pages/transaction_form', { error: 'Monto inválido. Por favor verifica los campos.' });
         }
 
+        // Convertir amount a número
+        const amountNumeric = parseFloat(amount);
+
         // Si es un Egreso, validamos el número de cuenta de destino
         let destinationUser;
         if (type === 'expense' && !destinationAccountNumber) {
@@ -115,7 +118,7 @@ exports.createTransaction = async (req, res) => {
 
         // Validar que el usuario emisor tiene saldo suficiente en caso de un Egreso
         const senderUser = await User.findByPk(req.user.id);
-        if (type === 'expense' && senderUser.balance < amount) {
+        if (type === 'expense' && senderUser.balance < amountNumeric) {
             return res.status(400).render('pages/transaction_form', { error: 'Saldo insuficiente para realizar la transacción.' });
         }
 
@@ -123,7 +126,7 @@ exports.createTransaction = async (req, res) => {
         const transaction = await Transaction.create({
             user_id: req.user.id, // Usuario emisor
             destination_user_id: destinationUser ? destinationUser.id : null, // Usuario receptor (solo para egresos)
-            amount,
+            amount: amountNumeric,
             type, // Tipo de transacción (Ingreso o Egreso)
             description: description || null
         });
@@ -131,15 +134,15 @@ exports.createTransaction = async (req, res) => {
         // Actualizar los saldos según el tipo de transacción
         if (type === 'expense') {
             // Restamos del saldo del usuario emisor
-            senderUser.balance -= amount;
+            senderUser.balance -= amountNumeric;
             await senderUser.save();
 
             // Sumamos al saldo del usuario receptor (destino)
-            destinationUser.balance += amount;
+            destinationUser.balance += amountNumeric;
             await destinationUser.save();
         } else if (type === 'income') {
             // Sumamos al saldo del usuario emisor (ingreso)
-            senderUser.balance += amount;
+            senderUser.balance += amountNumeric;
             await senderUser.save();
         }
 
@@ -149,3 +152,4 @@ exports.createTransaction = async (req, res) => {
         return res.render('errors/500', { error: 'Hubo un problema al registrar la transacción. Por favor, intenta nuevamente.' });
     }
 };
+
