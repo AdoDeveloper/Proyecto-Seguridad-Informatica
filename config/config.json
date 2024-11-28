@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "transactions_veryexact",
+    "password": "a8ece0d7febade8e228205de73d9d20a292da659",
+    "database": "transactions_veryexact",
+    "host": "yjldu.h.filess.io",
+    "dialect": "mysql",
+    "port": "3306"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

@@ -1,4 +1,4 @@
-<main class="">
+<main>
   <!-- ===== Formulario de Registro Start ===== -->
   <section class="container py-5">
     <div class="row justify-content-center">
@@ -15,7 +15,7 @@
             </div>
             {{/if}}
 
-            <form action="/register" method="POST">
+            <form action="/register" method="POST" novalidate>
               <!-- Campo de nombre de usuario -->
               <div class="mb-3">
                 <label for="username" class="form-label">Nombre de Usuario</label>

@@ -20,7 +20,7 @@ app.use(morgan('dev')); // Usa el formato 'dev' para un registro más legible en
 app.use(session({
   secret: process.env.SECRET_KEY, // Cambia por algo más seguro
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: { secure: process.env.NODE_ENV === 'production' } // Asegúrate de que el cookie es seguro en producción
 }));
 
@@ -44,6 +44,11 @@ app.set('view engine', '.hbs');
 app.use((req, res, next) => {
   res.locals.user = req.session.user;
   next();
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);  // Imprimir el error en consola
+  res.status(500).render('errors/500');  // Renderizar la vista personalizada de error 500
 });
 
 // Middleware adicional

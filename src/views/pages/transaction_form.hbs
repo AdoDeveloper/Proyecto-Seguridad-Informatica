@@ -5,6 +5,15 @@
         <p class="text-lg text-gray-600 mb-8 text-center">Completa el siguiente formulario para registrar una nueva transacción.</p>
 
         <div class="max-w-lg mx-auto bg-white shadow-lg rounded-lg p-8">
+            <!-- Mostrar error si existe -->
+            {{#if error}}
+            <div class="mb-4">
+                <div class="bg-red-100 text-red-700 border border-red-500 rounded-lg p-3">
+                    <p>{{error}}</p>
+                </div>
+            </div>
+            {{/if}}
+
             <form action="/transactions/create" method="POST">
                 <!-- Monto -->
                 <div class="mb-5">
@@ -16,9 +25,15 @@
                 <div class="mb-5">
                     <label for="type" class="block text-gray-700 font-semibold mb-2">Tipo de Transacción</label>
                     <select name="type" id="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                        <option value="Ingreso">Ingreso</option>
-                        <option value="Egreso">Egreso</option>
+                        <option value="income">Ingreso</option>
+                        <option value="expense">Egreso</option>
                     </select>
+                </div>
+
+                <!-- Cuenta destino (solo para "Egreso") -->
+                <div class="mb-5" id="destinationAccountField" style="display:none;">
+                    <label for="destinationAccountNumber" class="block text-gray-700 font-semibold mb-2">Número de Cuenta de Destino</label>
+                    <input type="text" name="destinationAccountNumber" id="destinationAccountNumber" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Número de cuenta de destino">
                 </div>
 
                 <!-- Descripción -->
@@ -29,7 +44,7 @@
 
                 <!-- Botones: Registrar y Cancelar -->
                 <div class="flex justify-between mb-5">
-                                        <!-- Botón de Cancelar -->
+                    <!-- Botón de Cancelar -->
                     <a href="/transactions/dashboard" class="mr-1 w-full text-center py-3 px-4 border-2 border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition duration-300 flex justify-center items-center">
                         Cancelar
                     </a>
@@ -42,3 +57,15 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Mostrar/ocultar campo de cuenta de destino dependiendo del tipo de transacción
+    document.getElementById('type').addEventListener('change', function() {
+        var destinationAccountField = document.getElementById('destinationAccountField');
+        if (this.value === 'expense') {
+            destinationAccountField.style.display = 'block';
+        } else {
+            destinationAccountField.style.display = 'none';
+        }
+    });
+</script>
