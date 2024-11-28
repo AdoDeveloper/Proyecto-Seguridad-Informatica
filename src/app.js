@@ -84,14 +84,18 @@ cron.schedule('*/14 * * * *', async () => {
 
 // Middleware para limitar solicitudes (rate limiter) // Mitigacion
 const limiter = rateLimit({
-  windowMs: 20 * 1000, // 20 segundos
+  windowMs: 10 * 1000, // 10 segundos
   max: 100, // Limita a 100 solicitudes por IP en 20 segundos
   message: 'Demasiadas solicitudes desde esta IP, por favor intente más tarde.',
   headers: true, // Añadir cabeceras en la respuesta con el límite
 });
 
-// Aplica el rate limiter a todas las rutas
-app.use(limiter); // Mitigacion
+// Middleware para la protección contra lentitud de solicitudes (slow down) // Mitigacion
+const speedLimiter = slowDown({
+  windowMs: 10 * 1000, // 10 segundos
+  delayAfter: 50, // Retrasa las solicitudes después de 50 peticiones
+  delayMs: () => 500, // Retrasa 500ms por cada solicitud adicional
+});
 
 // Middleware para detectar y bloquear IPs que realicen demasiadas solicitudes // Mitigacion
 const trackRequests = (req, res, next) => {
@@ -108,7 +112,7 @@ const trackRequests = (req, res, next) => {
   const ipData = ipTracker.get(ip); // Mitigacion
 
   // Si han pasado menos de 60 segundos desde la última solicitud y la IP ha realizado más de 1000 solicitudes // Mitigacion
-  if (Date.now() - ipData.lastRequest < 60 * 1000 && ipData.requests > 1000) {
+  if (Date.now() - ipData.lastRequest < 10 * 1000 && ipData.requests > 1000) {
     return res.status(429).send('Demasiadas solicitudes desde esta IP, su acceso está temporalmente bloqueado.');
   }
 
@@ -121,18 +125,10 @@ const trackRequests = (req, res, next) => {
   next();
 };
 
-// Aplica el middleware de tracking de IPs // Mitigacion
-app.use(trackRequests);
-
-// Middleware para la protección contra lentitud de solicitudes (slow down) // Mitigacion
-const speedLimiter = slowDown({
-  windowMs: 20 * 1000, // 20 segundos
-  delayAfter: 50, // Retrasa las solicitudes después de 50 peticiones
-  delayMs: () => 500, // Retrasa 500ms por cada solicitud adicional
-});
-
-// Aplica el slow down a todas las rutas // Mitigacion
+// Aplica el rate limiter, slow down y tracking de IPs a todas las rutas
+app.use(limiter);
 app.use(speedLimiter);
+app.use(trackRequests);
 
 // Configura Helmet para mejorar la seguridad de la aplicación // Mitigacion
 app.use(helmet());
